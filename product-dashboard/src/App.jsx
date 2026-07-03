@@ -31,7 +31,7 @@ function AppContent() {
     <div className="flex flex-col min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300">
       <Navbar theme={theme} toggleTheme={toggleTheme} />
       
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-12 flex-grow w-full">
         <Routes>
           <Route
             path="/"

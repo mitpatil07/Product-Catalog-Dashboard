@@ -438,27 +438,29 @@ export function Dashboard({ products = [], activities = [], clearActivities }) {
               <p className="text-[10px] text-slate-500 mt-1">Actions you trigger will populate here.</p>
             </div>
           ) : (
-            <div className="relative pl-4 space-y-5 py-2 border-l border-slate-200 dark:border-slate-850 max-h-[300px] overflow-y-auto pr-1">
-              {activities.map((activity) => {
-                let dotColor = 'bg-blue-500 ring-blue-100 dark:ring-blue-950/40';
-                if (activity.type === 'add') dotColor = 'bg-emerald-500 ring-emerald-100 dark:ring-emerald-950/40';
-                if (activity.type === 'edit') dotColor = 'bg-amber-500 ring-amber-100 dark:ring-amber-950/40';
-                if (activity.type === 'delete') dotColor = 'bg-rose-500 ring-rose-100 dark:ring-rose-950/40';
+            <div className="max-h-[300px] overflow-y-auto pr-1">
+              <div className="relative border-l border-slate-200 dark:border-slate-800/85 space-y-5 py-2 ml-4">
+                {activities.map((activity) => {
+                  let dotColor = 'bg-blue-500 ring-blue-100 dark:ring-blue-950/40';
+                  if (activity.type === 'add') dotColor = 'bg-emerald-500 ring-emerald-100 dark:ring-emerald-950/40';
+                  if (activity.type === 'edit') dotColor = 'bg-amber-500 ring-amber-100 dark:ring-amber-950/40';
+                  if (activity.type === 'delete') dotColor = 'bg-rose-500 ring-rose-100 dark:ring-rose-950/40';
 
-                return (
-                  <div key={activity.id} className="relative group">
-                    <span className={`absolute -left-[22.5px] top-1.5 h-3 w-3 rounded-full ring-4 ${dotColor} transition-transform duration-200 group-hover:scale-110`} />
-                    <div className="min-w-0">
-                      <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 leading-relaxed">
-                        {activity.message}
-                      </p>
-                      <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
-                        {formatRelativeTime(activity.timestamp)}
-                      </p>
+                  return (
+                    <div key={activity.id} className="relative group pl-6">
+                      <span className={`absolute left-0 -translate-x-1/2 top-1.5 h-3 w-3 rounded-full ring-4 ${dotColor} transition-transform duration-200 group-hover:scale-110`} />
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 leading-relaxed">
+                          {activity.message}
+                        </p>
+                        <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
+                          {formatRelativeTime(activity.timestamp)}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           )}
         </Card>
