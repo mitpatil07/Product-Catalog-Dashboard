@@ -1,10 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Search, Plus, Edit2, Trash2, Filter,
-  ShieldCheck, ShieldAlert, Monitor, PenTool,
-  Laptop, Utensils, Shirt, Dumbbell, Sparkles, Package, Layers,
-  Database, Download, Upload
+  Search, Plus, Edit2, Trash2, Filter, ArrowUpDown, LayoutGrid, List,
+  AlertTriangle, ShieldCheck, ShieldAlert, Check, Monitor, PenTool,
+  Laptop, Utensils, Shirt, Dumbbell, Sparkles, Package, Layers, Eye
 } from 'lucide-react';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
@@ -42,9 +41,9 @@ const getCategoryStyles = (category) => {
   }
   if (cat.includes('kitchen') || cat.includes('cook')) {
     return {
-      gradient: 'from-rose-500/20 to-orange-500/30 text-rose-500 dark:text-rose-450',
+      gradient: 'from-rose-500/20 to-orange-500/30 text-rose-500 dark:text-rose-400',
       glow: 'hover:shadow-lg hover:shadow-rose-500/10 dark:hover:shadow-rose-500/5 hover:border-rose-400/50',
-      tag: 'bg-rose-50 text-rose-650 dark:bg-rose-950/40 dark:text-rose-400 border-rose-100/40 dark:border-rose-950/30',
+      tag: 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400 border-rose-100/40 dark:border-rose-950/30',
       icon: Utensils
     };
   }
@@ -52,13 +51,13 @@ const getCategoryStyles = (category) => {
     return {
       gradient: 'from-pink-500/20 to-fuchsia-600/30 text-pink-500 dark:text-pink-400',
       glow: 'hover:shadow-lg hover:shadow-pink-500/10 dark:hover:shadow-pink-500/5 hover:border-pink-400/50',
-      tag: 'bg-pink-50 text-pink-650 dark:bg-pink-950/40 dark:text-pink-400 border-pink-100/40 dark:border-pink-950/30',
+      tag: 'bg-pink-50 text-pink-600 dark:bg-pink-950/40 dark:text-pink-400 border-pink-100/40 dark:border-pink-950/30',
       icon: Shirt
     };
   }
   if (cat.includes('fit') || cat.includes('sport') || cat.includes('gym')) {
     return {
-      gradient: 'from-emerald-500/20 to-cyan-600/30 text-emerald-500 dark:text-emerald-405',
+      gradient: 'from-emerald-500/20 to-cyan-600/30 text-emerald-500 dark:text-emerald-400',
       glow: 'hover:shadow-lg hover:shadow-emerald-500/10 dark:hover:shadow-emerald-500/5 hover:border-emerald-400/50',
       tag: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-100/40 dark:border-emerald-950/30',
       icon: Dumbbell
@@ -75,7 +74,7 @@ const getCategoryStyles = (category) => {
   return {
     gradient: 'from-slate-500/20 to-slate-600/30 text-slate-500 dark:text-slate-400',
     glow: 'hover:shadow-lg hover:shadow-slate-500/10 dark:hover:shadow-slate-500/5 hover:border-slate-400/50',
-    tag: 'bg-slate-50 text-slate-650 dark:bg-slate-950/40 dark:text-slate-400 border-slate-100/40 dark:border-slate-950/30',
+    tag: 'bg-slate-50 text-slate-600 dark:bg-slate-950/40 dark:text-slate-400 border-slate-100/40 dark:border-slate-950/30',
     icon: Package
   };
 };
@@ -95,9 +94,6 @@ export function ProductList({ products = [], setProducts, logActivity }) {
   // Selection states for Bulk Action Batching
   const [selectedIds, setSelectedIds] = useState([]);
   
-  // Portability widget state
-  const [showBackupPanel, setShowBackupPanel] = useState(false);
-
   // Modals gates
   const [deletingProductId, setDeletingProductId] = useState(null);
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
@@ -163,6 +159,7 @@ export function ProductList({ products = [], setProducts, logActivity }) {
     setProducts(prev => prev.filter(p => p.id !== deletingProductId));
     setSelectedIds(prev => prev.filter(id => id !== deletingProductId));
     
+    // Log activity
     logActivity(`Product "${targetProduct?.name}" was deleted from inventory database.`, 'delete');
     addToast(`"${targetProduct?.name}" has been deleted.`, 'success');
     setDeletingProductId(null);
@@ -201,84 +198,10 @@ export function ProductList({ products = [], setProducts, logActivity }) {
     setCurrentPage(1);
   };
 
-  // Standout Feature: Backup Downloader JSON
-  const handleExportDatabase = () => {
-    try {
-      const dataStr = JSON.stringify(products, null, 2);
-      const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-      
-      const backupFilename = `stocksync_backup_${new Date().toISOString().slice(0, 10)}.json`;
-      
-      const linkElement = document.createElement('a');
-      linkElement.setAttribute('href', dataUri);
-      linkElement.setAttribute('download', backupFilename);
-      linkElement.click();
-      
-      logActivity(`Exported complete inventory database backup JSON file.`, 'info');
-      addToast('Backup JSON file downloaded successfully.', 'success');
-    } catch (error) {
-      addToast('Failed to export database backup.', 'error');
-    }
-  };
-
-  // Standout Feature: Backup Restore/Importer Parser
-  const handleImportDatabase = (e) => {
-    const fileReader = new FileReader();
-    const file = e.target.files[0];
-    if (!file) return;
-
-    fileReader.onload = (event) => {
-      try {
-        const importedData = JSON.parse(event.target.result);
-        
-        // Format schema constraint validation
-        if (!Array.isArray(importedData)) {
-          throw new Error('Backup data must be an array of products');
-        }
-
-        const isValid = importedData.every(item => 
-          item.id && 
-          item.name && 
-          item.category && 
-          typeof item.price === 'number' && 
-          typeof item.quantity === 'number' && 
-          (item.status === 'Active' || item.status === 'Inactive')
-        );
-
-        if (!isValid) {
-          throw new Error('Imported data contains missing or invalid keys.');
-        }
-
-        // Merge databases prioritizing imported entries for matching IDs
-        setProducts(prev => {
-          const merged = [...prev];
-          importedData.forEach(importedItem => {
-            const index = merged.findIndex(p => p.id === importedItem.id);
-            if (index > -1) {
-              merged[index] = importedItem;
-            } else {
-              merged.push(importedItem);
-            }
-          });
-          return merged;
-        });
-
-        logActivity(`Imported and merged ${importedData.length} catalog items from backup file.`, 'add');
-        addToast(`Successfully merged ${importedData.length} items from backup file.`, 'success');
-        e.target.value = '';
-      } catch (error) {
-        addToast(`Invalid backup structure: ${error.message}`, 'error');
-        e.target.value = '';
-      }
-    };
-
-    fileReader.readAsText(file, 'UTF-8');
-  };
-
   return (
     <div className="space-y-6 animate-fade-in pb-16 relative">
       
-      {/* Title block with Database Migration trigger */}
+      {/* Title block */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="font-heading text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">Product Catalog</h1>
@@ -286,70 +209,15 @@ export function ProductList({ products = [], setProducts, logActivity }) {
             Audit catalog assets, manage listing states, and implement bulk inventory changes.
           </p>
         </div>
-        
-        <div className="flex items-center gap-2 self-start sm:self-auto">
-          <Button
-            variant="outline"
-            onClick={() => setShowBackupPanel(!showBackupPanel)}
-            className={`h-10 w-10 !p-0 hover:border-indigo-400 hover:text-indigo-650 transition-[border-color,colors,transform] duration-205 active:scale-95 ${
-              showBackupPanel ? 'border-indigo-500 text-indigo-600 bg-indigo-50/50 dark:bg-indigo-950/20' : ''
-            }`}
-            title="Database Portability"
-          >
-            <Database className="w-4.5 h-4.5" />
-          </Button>
-
-          <Button
-            variant="primary"
-            onClick={() => navigate('/products/new')}
-            className="shadow-md shadow-indigo-200 dark:shadow-none hover:scale-102 transition-[transform,colors] duration-200 active:scale-98"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Add Product</span>
-          </Button>
-        </div>
-      </div>
-
-      {/* Backup and Recovery migration deck */}
-      {showBackupPanel && (
-        <Card
-          title="Data Administration & Portability"
-          subtitle="Export inventory states or import catalog backups"
-          className="bg-slate-50/20 dark:bg-slate-900/10 border-indigo-100 dark:border-indigo-950/20 animate-slide-in"
+        <Button
+          variant="primary"
+          onClick={() => navigate('/products/new')}
+          className="shadow-md shadow-indigo-200 dark:shadow-none self-start sm:self-auto hover:scale-102 transition-all active:scale-98"
         >
-          <div className="flex flex-col sm:flex-row items-center gap-4 text-xs font-semibold">
-            <Button
-              variant="outline"
-              onClick={handleExportDatabase}
-              className="w-full sm:w-auto hover:border-indigo-400 hover:text-indigo-600 hover:bg-slate-50 dark:hover:bg-slate-800/40"
-            >
-              <Download className="w-4 h-4" />
-              <span>Export Database Backup (.json)</span>
-            </Button>
-
-            <div className="relative w-full sm:w-auto">
-              <input
-                type="file"
-                accept=".json"
-                onChange={handleImportDatabase}
-                className="hidden"
-                id="db-import-uploader"
-              />
-              <label
-                htmlFor="db-import-uploader"
-                className="inline-flex items-center justify-center gap-2 px-4 py-2 border border-slate-300 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer select-none text-slate-700 dark:text-slate-300 w-full active:scale-98 transition-[transform,colors,background-color] duration-200 hover:border-indigo-400 hover:text-indigo-650"
-              >
-                <Upload className="w-4 h-4" />
-                <span>Import Database Backup</span>
-              </label>
-            </div>
-            
-            <p className="text-[10px] text-slate-400 dark:text-slate-500 italic max-w-xs mt-1 sm:mt-0 sm:ml-auto leading-relaxed">
-              Upload a valid StockSync JSON file to merge or overwrite listings. Duplicates are resolved by overwriting existing items.
-            </p>
-          </div>
-        </Card>
-      )}
+          <Plus className="w-4 h-4" />
+          <span>Add Product</span>
+        </Button>
+      </div>
 
       {/* Polish Filter Deck */}
       <Card className="!p-4 bg-slate-50/50 dark:bg-slate-900/30">
@@ -367,7 +235,7 @@ export function ProductList({ products = [], setProducts, logActivity }) {
                   setSearchTerm(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full pl-11 pr-4 py-2.5 text-sm bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-[border-color,box-shadow] duration-200 text-slate-800 dark:text-slate-200"
+                className="w-full pl-11 pr-4 py-2.5 text-sm bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-slate-800 dark:text-slate-200"
               />
             </div>
             
@@ -379,7 +247,7 @@ export function ProductList({ products = [], setProducts, logActivity }) {
                   setSelectedCategory(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full px-3 py-2.5 text-sm bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-[border-color,box-shadow] duration-200 text-slate-800 dark:text-slate-200 appearance-none cursor-pointer"
+                className="w-full px-3 py-2.5 text-sm bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-slate-800 dark:text-slate-200 appearance-none cursor-pointer"
               >
                 <option value="All">All Categories</option>
                 {categories.filter(c => c !== 'All').map(cat => (
@@ -399,7 +267,7 @@ export function ProductList({ products = [], setProducts, logActivity }) {
                     setSelectedStatus(status);
                     setCurrentPage(1);
                   }}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-[colors,background-color] duration-200 ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${
                     selectedStatus === status
                       ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-2xs'
                       : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
@@ -415,7 +283,7 @@ export function ProductList({ products = [], setProducts, logActivity }) {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full px-3 py-2.5 text-xs font-semibold bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-[border-color,box-shadow] duration-200 text-slate-800 dark:text-slate-200 appearance-none cursor-pointer"
+                className="w-full px-3 py-2.5 text-xs font-semibold bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-slate-800 dark:text-slate-200 appearance-none cursor-pointer"
               >
                 <option value="name-asc">Sort: A-Z</option>
                 <option value="name-desc">Sort: Z-A</option>
@@ -428,7 +296,7 @@ export function ProductList({ products = [], setProducts, logActivity }) {
             <div className="flex items-center border border-slate-200/80 dark:border-slate-800/80 rounded-xl p-1 bg-white dark:bg-slate-950 shadow-2xs">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-1.5 rounded-lg cursor-pointer transition-[colors,background-color] duration-200 ${
+                className={`p-1.5 rounded-lg cursor-pointer transition-all ${
                   viewMode === 'grid'
                     ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400'
                     : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
@@ -439,7 +307,7 @@ export function ProductList({ products = [], setProducts, logActivity }) {
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-1.5 rounded-lg cursor-pointer transition-[colors,background-color] duration-200 ${
+                className={`p-1.5 rounded-lg cursor-pointer transition-all ${
                   viewMode === 'list'
                     ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400'
                     : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
@@ -471,7 +339,7 @@ export function ProductList({ products = [], setProducts, logActivity }) {
 
       {/* Empty / Error Gates */}
       {products.length === 0 ? (
-        <Card className="flex flex-col items-center justify-center py-24 text-center border-dashed border-2 border-slate-200 dark:border-slate-800 bg-white/30 rounded-3xl animate-fade-in">
+        <Card className="flex flex-col items-center justify-center py-24 text-center border-dashed border-2 border-slate-200 dark:border-slate-800 bg-white/30 rounded-3xl">
           <div className="w-20 h-20 rounded-3xl bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-6 animate-pulse">
             <Package className="w-10 h-10" />
           </div>
@@ -489,7 +357,7 @@ export function ProductList({ products = [], setProducts, logActivity }) {
           </Button>
         </Card>
       ) : filteredProducts.length === 0 ? (
-        <Card className="flex flex-col items-center justify-center py-20 text-center bg-white/40 rounded-3xl border border-slate-100 dark:border-slate-800/40 animate-fade-in">
+        <Card className="flex flex-col items-center justify-center py-20 text-center bg-white/40 rounded-3xl border border-slate-100 dark:border-slate-800/40">
           <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-900/60 flex items-center justify-center text-slate-400 dark:text-slate-600 mb-4">
             <Filter className="w-6 h-6" />
           </div>
@@ -509,7 +377,7 @@ export function ProductList({ products = [], setProducts, logActivity }) {
         
         /* Premium Grid cards with Geometric Cover illustration */
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {paginatedProducts.map(product => {
               const isSelected = selectedIds.includes(product.id);
               const theme = getCategoryStyles(product.category);
@@ -554,17 +422,17 @@ export function ProductList({ products = [], setProducts, logActivity }) {
                         className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                           product.status === 'Active'
                             ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400'
-                            : 'bg-rose-50 text-rose-500 dark:bg-rose-950/20 dark:text-rose-455'
+                            : 'bg-rose-50 text-rose-500 dark:bg-rose-950/20 dark:text-rose-400'
                         }`}
                       >
                         {product.status === 'Active' ? (
                           <>
-                            <ShieldCheck className="w-3.5 h-3.5" />
+                            <ShieldCheck className="w-3 h-3" />
                             <span>Active</span>
                           </>
                         ) : (
                           <>
-                            <ShieldAlert className="w-3.5 h-3.5" />
+                            <ShieldAlert className="w-3 h-3" />
                             <span>Inactive</span>
                           </>
                         )}
@@ -608,7 +476,7 @@ export function ProductList({ products = [], setProducts, logActivity }) {
                       variant="outline"
                       size="sm"
                       onClick={() => navigate(`/products/edit/${product.id}`)}
-                      className="!py-1.5 !px-2.5 text-xs hover:border-indigo-500 hover:text-indigo-650 transition-[border-color,colors,transform] duration-200 hover:scale-102"
+                      className="!py-1.5 !px-2.5 text-xs hover:border-indigo-500 hover:text-indigo-600"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
                       <span>Edit</span>
@@ -617,7 +485,7 @@ export function ProductList({ products = [], setProducts, logActivity }) {
                       variant="outline"
                       size="sm"
                       onClick={() => setDeletingProductId(product.id)}
-                      className="!py-1.5 !px-2.5 text-xs text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:border-rose-500 dark:hover:border-rose-900 transition-[border-color,colors,transform] duration-200 hover:scale-102"
+                      className="!py-1.5 !px-2.5 text-xs text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:border-rose-500 dark:hover:border-rose-900"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                       <span>Delete</span>
@@ -639,7 +507,7 @@ export function ProductList({ products = [], setProducts, logActivity }) {
       ) : (
         
         /* Table / List View */
-        <div className="space-y-4 animate-fade-in">
+        <div className="space-y-4">
           <div className="w-full overflow-x-auto border border-slate-200 dark:border-slate-800/80 rounded-2xl bg-white dark:bg-slate-900 shadow-xs">
             <table className="w-full border-collapse text-left text-sm">
               <thead className="bg-slate-50 dark:bg-slate-800/40 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase border-b border-slate-200 dark:border-slate-800/60">
@@ -674,7 +542,7 @@ export function ProductList({ products = [], setProducts, logActivity }) {
                         />
                       </td>
                       <td className="px-6 py-4.5">
-                        <div className="font-bold text-slate-850 dark:text-slate-100 truncate max-w-xs">
+                        <div className="font-bold text-slate-800 dark:text-slate-100 truncate max-w-xs">
                           {product.name}
                         </div>
                         <div className="text-xs text-slate-400 dark:text-slate-500 truncate max-w-xs mt-0.5 leading-relaxed">
@@ -695,8 +563,8 @@ export function ProductList({ products = [], setProducts, logActivity }) {
                             product.quantity === 0
                               ? 'text-rose-500'
                               : product.quantity <= 5
-                              ? 'text-amber-505 font-extrabold'
-                              : 'text-slate-605 dark:text-slate-300'
+                              ? 'text-amber-500 font-extrabold'
+                              : 'text-slate-600 dark:text-slate-300'
                           }`}
                         >
                           {product.quantity === 0 ? 'Out of Stock' : `${product.quantity} units`}
@@ -707,7 +575,7 @@ export function ProductList({ products = [], setProducts, logActivity }) {
                           className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold ${
                             product.status === 'Active'
                               ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400'
-                              : 'bg-rose-50 text-rose-505 dark:bg-rose-950/20 dark:text-rose-400'
+                              : 'bg-rose-50 text-rose-500 dark:bg-rose-950/20 dark:text-rose-400'
                           }`}
                         >
                           <span className={`w-1.5 h-1.5 rounded-full ${
@@ -720,14 +588,14 @@ export function ProductList({ products = [], setProducts, logActivity }) {
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => navigate(`/products/edit/${product.id}`)}
-                            className="p-2 text-slate-400 hover:text-indigo-650 dark:hover:text-indigo-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-200 cursor-pointer"
+                            className="p-2 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer"
                             title="Edit"
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => setDeletingProductId(product.id)}
-                            className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-805 transition-colors duration-200 cursor-pointer"
+                            className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer"
                             title="Delete"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -770,7 +638,7 @@ export function ProductList({ products = [], setProducts, logActivity }) {
               variant="outline"
               size="sm"
               onClick={() => handleBulkStatusChange('Active')}
-              className="!text-white !border-slate-700 hover:!bg-white/10 !py-1.5 transition-[transform,background-color] duration-150 active:scale-95"
+              className="!text-white !border-slate-700 hover:!bg-white/10 !py-1.5"
             >
               <span>Activate</span>
             </Button>
@@ -778,7 +646,7 @@ export function ProductList({ products = [], setProducts, logActivity }) {
               variant="outline"
               size="sm"
               onClick={() => handleBulkStatusChange('Inactive')}
-              className="!text-white !border-slate-700 hover:!bg-white/10 !py-1.5 transition-[transform,background-color] duration-150 active:scale-95"
+              className="!text-white !border-slate-700 hover:!bg-white/10 !py-1.5"
             >
               <span>Suspend</span>
             </Button>
@@ -786,7 +654,7 @@ export function ProductList({ products = [], setProducts, logActivity }) {
               variant="danger"
               size="sm"
               onClick={() => setShowBulkDeleteModal(true)}
-              className="!py-1.5 shadow-md shadow-rose-900/20 transition-[transform,background-color] duration-150 active:scale-95"
+              className="!py-1.5 shadow-md shadow-rose-900/20"
             >
               <Trash2 className="w-3.5 h-3.5" />
               <span>Delete</span>
@@ -809,12 +677,12 @@ export function ProductList({ products = [], setProducts, logActivity }) {
       >
         <div className="flex items-start gap-4">
           <div className="p-3 bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 rounded-2xl flex-shrink-0">
-            <AlertTriangle className="w-6 h-6 animate-bounce" />
+            <AlertTriangle className="w-6 h-6" />
           </div>
           <div>
             <p className="font-semibold text-slate-800 dark:text-white">Delete catalog entry?</p>
             <p className="text-slate-500 dark:text-slate-400 text-xs mt-1.5 leading-relaxed">
-              Are you sure you want to delete <span className="font-semibold text-slate-705 dark:text-slate-200">"{productToBeDeleted?.name}"</span>? 
+              Are you sure you want to delete <span className="font-semibold text-slate-700 dark:text-slate-200">"{productToBeDeleted?.name}"</span>? 
               This product will be permanently removed. This action is irreversible.
             </p>
           </div>

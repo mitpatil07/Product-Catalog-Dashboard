@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, ShieldCheck, ShieldAlert, DollarSign, AlertCircle, TrendingUp, ChevronRight, Activity, Calendar, Sparkles } from 'lucide-react';
+import { Package, ShieldCheck, ShieldAlert, DollarSign, AlertCircle, TrendingUp, ChevronRight, Activity, Calendar } from 'lucide-react';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 
@@ -202,50 +202,6 @@ function Sparkline({ points, strokeColor, fillColor }) {
   );
 }
 
-// 2. Standout Feature: Dynamic Smart Insights Renderer
-function SmartInsights({ insights }) {
-  return (
-    <Card
-      title="StockSync Smart Insights"
-      subtitle="Dynamic inventory audit scanning listing metrics for business health"
-      actions={
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-purple-50 dark:bg-purple-950/40 border border-purple-100/50 dark:border-purple-900/30 text-purple-650 dark:text-purple-400 rounded-lg text-xs font-bold select-none">
-          <Sparkles className="w-3.5 h-3.5 animate-pulse" />
-          <span>Insights AI Active</span>
-        </div>
-      }
-    >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-        {insights.map((insight, index) => {
-          let themeClasses = 'bg-blue-50/50 dark:bg-blue-950/10 text-blue-900 dark:text-blue-300 border-blue-100/60 dark:border-blue-900/30';
-          let bulletColor = 'bg-blue-500';
-          
-          if (insight.type === 'danger') {
-            themeClasses = 'bg-rose-50/50 dark:bg-rose-950/10 text-rose-900 dark:text-rose-300 border-rose-100/60 dark:border-rose-900/30';
-            bulletColor = 'bg-rose-500 animate-pulse';
-          } else if (insight.type === 'warning') {
-            themeClasses = 'bg-amber-50/50 dark:bg-amber-950/10 text-amber-900 dark:text-amber-300 border-amber-100/60 dark:border-amber-900/30';
-            bulletColor = 'bg-amber-500';
-          } else if (insight.type === 'success') {
-            themeClasses = 'bg-emerald-50/50 dark:bg-emerald-950/10 text-emerald-900 dark:text-emerald-300 border-emerald-100/60 dark:border-emerald-900/30';
-            bulletColor = 'bg-emerald-500';
-          }
-
-          return (
-            <div
-              key={index}
-              className={`flex items-start gap-3 p-3.5 rounded-2xl border text-xs font-bold leading-relaxed transition-[transform,shadow] duration-200 hover:scale-[1.008] hover:shadow-xs ${themeClasses}`}
-            >
-              <span className={`w-2 h-2 mt-1.5 rounded-full flex-shrink-0 ${bulletColor}`} />
-              <p className="flex-grow pr-1">{insight.message}</p>
-            </div>
-          );
-        })}
-      </div>
-    </Card>
-  );
-}
-
 export function Dashboard({ products = [], activities = [], clearActivities }) {
   const navigate = useNavigate();
 
@@ -280,60 +236,6 @@ export function Dashboard({ products = [], activities = [], clearActivities }) {
       percentage: totalProducts ? ((categoryMap[name] / totalProducts) * 100) : 0
     })).sort((a, b) => b.count - a.count);
   }, [categoryMap, totalProducts]);
-
-  // Compute smart audit observations in real-time
-  const smartInsights = useMemo(() => {
-    const list = [];
-    if (products.length === 0) return list;
-
-    // 1. Deficit warning (Out of stock active items)
-    const outOfStockActive = products.filter(p => p.status === 'Active' && p.quantity === 0);
-    outOfStockActive.forEach(p => {
-      const standardDeficit = p.price * 10;
-      list.push({
-        type: 'danger',
-        message: `Revenue Gap: "${p.name}" (${p.category}) is active but out of stock. Estimating a $${standardDeficit.toFixed(2)} potential revenue deficit based on a 10-unit demand cycle.`,
-      });
-    });
-
-    // 2. Concentration risk warning
-    const totalVal = products.reduce((sum, p) => sum + p.price * p.quantity, 0);
-    if (totalVal > 0) {
-      const catVal = products.reduce((acc, p) => {
-        acc[p.category] = (acc[p.category] || 0) + p.price * p.quantity;
-        return acc;
-      }, {});
-      
-      Object.keys(catVal).forEach(cat => {
-        const percentage = (catVal[cat] / totalVal) * 100;
-        if (percentage >= 60) {
-          list.push({
-            type: 'warning',
-            message: `Concentration Risk: "${cat}" represents ${percentage.toFixed(0)}% ($${catVal[cat].toFixed(2)}) of total inventory valuation. We recommend expanding categories.`,
-          });
-        }
-      });
-    }
-
-    // 3. Unlisted stocked assets warning
-    const inactiveWithStock = products.filter(p => p.status === 'Inactive' && p.quantity > 0);
-    inactiveWithStock.forEach(p => {
-      list.push({
-        type: 'info',
-        message: `Unlisted Assets: "${p.name}" has ${p.quantity} units in stock but listing is Inactive. Enable visibility state to open item for transaction.`,
-      });
-    });
-
-    // 4. Fallback health report
-    if (list.length === 0) {
-      list.push({
-        type: 'success',
-        message: `Optimal Catalog Health: Categories are balanced, listing statuses look optimal, and stock distribution reflects no active bottlenecks.`,
-      });
-    }
-
-    return list;
-  }, [products]);
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -482,7 +384,7 @@ export function Dashboard({ products = [], activities = [], clearActivities }) {
         </Card>
       </div>
 
-      {/* Analytics Section with Donut Chart and Timeline Logs */}
+      {/* Redesigned Analytics Section with Donut Chart and Timeline Logs */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
         
         {/* Memoized Interactive Donut Chart Container (2/3 width) */}
@@ -543,13 +445,6 @@ export function Dashboard({ products = [], activities = [], clearActivities }) {
           )}
         </Card>
       </div>
-
-      {/* Standout Feature: Dynamic Smart Insights Panel */}
-      {products.length > 0 && (
-        <div className="grid grid-cols-1 gap-6">
-          <SmartInsights insights={smartInsights} />
-        </div>
-      )}
 
       {/* Critical Stock Warnings */}
       {criticalStockItems.length > 0 && (
