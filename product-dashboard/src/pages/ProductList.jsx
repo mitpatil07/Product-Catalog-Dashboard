@@ -620,25 +620,25 @@ export function ProductList({ products = [], setProducts, logActivity }) {
 
       {/* Floating Bulk Actions Bar */}
       {selectedIds.length > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-slate-900/90 dark:bg-slate-900/95 text-white backdrop-blur-md px-6 py-4 rounded-2xl shadow-xl flex items-center justify-between gap-6 border border-slate-800 animate-slide-in w-[90%] max-w-2xl select-none">
-          <div className="flex items-center gap-3">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-slate-900/90 dark:bg-slate-900/95 text-white backdrop-blur-md px-5 py-4 rounded-2xl shadow-xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border border-slate-800 animate-slide-in w-[90%] max-w-2xl select-none">
+          <div className="flex items-center justify-center sm:justify-start gap-3">
             <div className="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
               <Layers className="w-4.5 h-4.5" />
             </div>
             <div>
-              <p className="text-xs font-bold tracking-wide text-indigo-300 uppercase">Batch Selection</p>
-              <p className="text-sm font-extrabold text-slate-100 mt-0.5">
+              <p className="text-[10px] font-bold tracking-wide text-indigo-300 uppercase text-center sm:text-left">Batch Selection</p>
+              <p className="text-sm font-extrabold text-slate-100 mt-0.5 text-center sm:text-left">
                 {selectedIds.length} {selectedIds.length === 1 ? 'item' : 'items'} selected
               </p>
             </div>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => handleBulkStatusChange('Active')}
-              className="!text-white !border-slate-700 hover:!bg-white/10 !py-1.5"
+              className="!text-white !border-slate-700 hover:!bg-white/10 !py-1.5 flex-1 sm:flex-none justify-center"
             >
               <span>Activate</span>
             </Button>
@@ -646,7 +646,7 @@ export function ProductList({ products = [], setProducts, logActivity }) {
               variant="outline"
               size="sm"
               onClick={() => handleBulkStatusChange('Inactive')}
-              className="!text-white !border-slate-700 hover:!bg-white/10 !py-1.5"
+              className="!text-white !border-slate-700 hover:!bg-white/10 !py-1.5 flex-1 sm:flex-none justify-center"
             >
               <span>Suspend</span>
             </Button>
@@ -654,7 +654,7 @@ export function ProductList({ products = [], setProducts, logActivity }) {
               variant="danger"
               size="sm"
               onClick={() => setShowBulkDeleteModal(true)}
-              className="!py-1.5 shadow-md shadow-rose-900/20"
+              className="!py-1.5 shadow-md shadow-rose-900/20 flex-1 sm:flex-none justify-center"
             >
               <Trash2 className="w-3.5 h-3.5" />
               <span>Delete</span>

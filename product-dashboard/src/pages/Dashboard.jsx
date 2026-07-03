@@ -14,7 +14,7 @@ function formatRelativeTime(isoString) {
     if (diffMins < 1) return 'Just now';
     if (diffMins < 60) return `${diffMins}m ago`;
     if (diffHours < 24) return `${diffHours}h ago`;
-    
+
     return new Date(isoString).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
@@ -52,7 +52,7 @@ const CategoryDonutChart = React.memo(({ categories = [], totalProducts = 0 }) =
       const strokeDasharray = `${length} ${circumference}`;
       const strokeDashoffset = -accumulatedAngle;
       accumulatedAngle += length;
-      
+
       return {
         ...cat,
         strokeDasharray,
@@ -151,11 +151,10 @@ const CategoryDonutChart = React.memo(({ categories = [], totalProducts = 0 }) =
               key={segment.name}
               onMouseEnter={() => setHoveredCategory(segment.name)}
               onMouseLeave={() => setHoveredCategory(null)}
-              className={`flex items-center justify-between p-2 rounded-xl border transition-[background-color,border-color,transform] duration-200 cursor-pointer ${
-                isSelected
+              className={`flex items-center justify-between p-2 rounded-xl border transition-[background-color,border-color,transform] duration-200 cursor-pointer ${isSelected
                   ? 'bg-indigo-50/60 dark:bg-indigo-950/20 border-indigo-200/50 dark:border-indigo-950/30 scale-[1.02] shadow-2xs'
                   : 'bg-transparent border-transparent hover:bg-slate-50 dark:hover:bg-slate-900/30'
-              }`}
+                }`}
             >
               <div className="flex items-center gap-3 min-w-0">
                 <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${segment.colorClass.replace('stroke', 'bg')}`} />
@@ -209,7 +208,7 @@ export function Dashboard({ products = [], activities = [], clearActivities }) {
   const totalProducts = products.length;
   const activeProducts = products.filter(p => p.status === 'Active').length;
   const inactiveProducts = products.filter(p => p.status === 'Inactive').length;
-  
+
   const totalInventoryValue = products.reduce(
     (sum, p) => sum + (parseFloat(p.price) || 0) * (parseInt(p.quantity) || 0),
     0
@@ -239,57 +238,76 @@ export function Dashboard({ products = [], activities = [], clearActivities }) {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      
+
       {/* Redesigned Premium Welcome Banner with grid lines mesh and gradients */}
       <div className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl">
         {/* Visual CSS grid pattern layout */}
-        <div 
+        <div
           className="absolute inset-0 opacity-15 pointer-events-none mix-blend-overlay"
           style={{
             backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.15) 1px, transparent 1px)',
             backgroundSize: '24px 24px'
           }}
         />
-        
+
         {/* Soft glowing mesh gradient in backdrop */}
         <div className="absolute right-0 top-0 w-80 h-80 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none -mr-20 -mt-20" />
         <div className="absolute left-1/4 bottom-0 w-64 h-64 rounded-full bg-purple-500/5 blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-lg text-xs font-bold mb-4 select-none uppercase tracking-widest">
-              <Activity className="w-3.5 h-3.5 animate-pulse" />
-              <span>Admin Terminal</span>
-            </div>
-            <h1 className="font-heading text-2xl sm:text-4xl font-extrabold tracking-tight">
+        <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8">
+          <div className="max-w-2xl text-left space-y-4">
+            <h1 className="font-heading text-3xl sm:text-4xl font-extrabold tracking-tight">
               Welcome Back, Merchant
             </h1>
-            <p className="text-sm text-slate-400 mt-2 max-w-xl leading-relaxed">
+            <p className="text-sm text-slate-400 leading-relaxed max-w-xl">
               Your catalogs are fully synced, stocks are updated, and metrics look healthy. Below is the inventory audit for your merchandise assets.
             </p>
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              <Button
+                variant="primary"
+                onClick={() => navigate('/products/new')}
+                className="!bg-indigo-600 !text-white hover:!bg-indigo-500 !border-indigo-600 hover:!border-indigo-500 shadow-lg shadow-indigo-600/20 active:scale-95"
+              >
+                Add Product
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => navigate('/products')}
+                className="!border-slate-800 hover:!border-slate-700 !text-slate-300 hover:!text-white hover:!bg-white/5 active:scale-95"
+              >
+                Audit Database
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Button
-              variant="primary"
-              onClick={() => navigate('/products/new')}
-              className="!bg-white !text-slate-900 hover:!bg-slate-100 !border-white shadow-lg shadow-white/5 active:scale-95"
-            >
-              Add Product
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => navigate('/products')}
-              className="!border-slate-800 hover:!border-slate-700 !text-slate-300 hover:!text-white hover:!bg-white/5 active:scale-95"
-            >
-              Audit Database
-            </Button>
+
+          {/* Premium Abstract SVG Node-flow Illustration */}
+          <div className="hidden lg:block w-72 h-36 relative select-none opacity-85">
+            <svg viewBox="0 0 200 120" className="w-full h-full">
+              {/* Node lines */}
+              <path d="M20,60 L60,30 L100,80 L140,40 L180,90" fill="none" stroke="rgba(99, 102, 241, 0.2)" strokeWidth="3" strokeDasharray="4 4" />
+              <path d="M20,60 L60,30 L100,80 L140,40 L180,90" fill="none" stroke="rgba(99, 102, 241, 0.45)" strokeWidth="2.5" />
+
+              {/* Nodes */}
+              <circle cx="20" cy="60" r="4.5" fill="#6366f1" />
+              <circle cx="60" cy="30" r="4" fill="#a855f7" />
+              <circle cx="100" cy="80" r="5" fill="#f43f5e" />
+              <circle cx="140" cy="40" r="4.5" fill="#10b981" />
+              <circle cx="180" cy="90" r="6" fill="#f59e0b" className="animate-pulse" />
+
+              {/* Grid meshes in background */}
+              <line x1="20" y1="10" x2="20" y2="110" stroke="rgba(255, 255, 255, 0.02)" strokeWidth="1" />
+              <line x1="60" y1="10" x2="60" y2="110" stroke="rgba(255, 255, 255, 0.02)" strokeWidth="1" />
+              <line x1="100" y1="10" x2="100" y2="110" stroke="rgba(255, 255, 255, 0.02)" strokeWidth="1" />
+              <line x1="140" y1="10" x2="140" y2="110" stroke="rgba(255, 255, 255, 0.02)" strokeWidth="1" />
+              <line x1="180" y1="10" x2="180" y2="110" stroke="rgba(255, 255, 255, 0.02)" strokeWidth="1" />
+            </svg>
           </div>
         </div>
       </div>
 
       {/* Polish Stats Grid with SVG Sparkline Trends */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        
+
         {/* Total Products */}
         <Card className="relative overflow-hidden group hover:border-indigo-500/30 transition-[border-color,box-shadow] duration-200">
           <div className="flex items-start justify-between">
@@ -386,7 +404,7 @@ export function Dashboard({ products = [], activities = [], clearActivities }) {
 
       {/* Redesigned Analytics Section with Donut Chart and Timeline Logs */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
-        
+
         {/* Memoized Interactive Donut Chart Container (2/3 width) */}
         <Card
           title="Category Distributions"
@@ -470,11 +488,10 @@ export function Dashboard({ products = [], activities = [], clearActivities }) {
                 </div>
                 <div className="flex-shrink-0 text-right">
                   <span
-                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-bold ${
-                      item.quantity === 0
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-bold ${item.quantity === 0
                         ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300'
                         : 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300'
-                    }`}
+                      }`}
                   >
                     <AlertCircle className="w-3.5 h-3.5 animate-pulse" />
                     {item.quantity === 0 ? 'Out of Stock' : `${item.quantity} Left`}
