@@ -2,6 +2,9 @@
 
 A responsive, high-performance, and visually stunning React application designed for managing a product inventory catalog. Built with **React.js**, **React Router**, and the newly released **Tailwind CSS v4** with native `@tailwindcss/vite` integration.
 
+> [!NOTE]
+> **Repository Layout**: This project is structured directly at the repository root. All source assets (`src/`, `public/`) and configuration profiles (`package.json`, `.gitignore`) are aligned at the top level for seamless compilation, quick setup, and immediate preview rendering on GitHub.
+
 ## ✨ Features
 
 - **📊 Comprehensive Analytics Dashboard**:
@@ -31,30 +34,32 @@ A responsive, high-performance, and visually stunning React application designed
 
 ## 📁 Folder Structure
 
-The project strictly follows the requested modular layout:
+The project strictly follows the requested modular layout directly at the repository root:
 
 ```text
-product-dashboard/
+Product-Catalog-Dashboard/ (Repository Root)
 ├── dist/                  # Production build output
-├── public/                # Static public assets
+├── public/                # Static public assets (Favicon, icons)
 ├── src/
 │   ├── components/        # Reusable UI components
 │   │   ├── Button.jsx     # Button configurations (variants, sizes, loading)
 │   │   ├── Card.jsx       # Elegant glassmorphic container layout
-│   │   ├── Modal.jsx      # Deletion gates and prompts
-│   │   ├── Navbar.jsx     # Navigation bar and theme switcher toggle
+│   │   ├── Modal.jsx      # Deletion confirmation gates
+│   │   ├── Navbar.jsx     # Floating header and theme switcher
 │   │   └── Pagination.jsx # Paging navigator
 │   ├── context/           # React Context Providers
-│   │   └── ToastContext.jsx # Queue-based toast provider & hook
+│   │   └── ToastContext.jsx # Global queue-based notification system
 │   ├── hooks/             # Custom state hooks
-│   │   └── useLocalStorage.js # Sync states with localStorage + mock seed data
+│   │   ├── useLocalStorage.js # LocalStorage synchronization & pre-seeding logic
+│   │   └── useRecentActivity.js # Recent auditing logs logger hook
 │   ├── pages/             # Route-level views
-│   │   ├── Dashboard.jsx  # Analytics overview
+│   │   ├── Dashboard.jsx  # Analytics overview charts
 │   │   ├── ProductForm.jsx# Add / Edit form with live preview
-│   │   └── ProductList.jsx# Main searchable catalog
-│   ├── App.jsx            # Main app router wrapper
+│   │   └── ProductList.jsx# Main searchable catalog grid
+│   ├── App.jsx            # Main app router and layout wrapper
 │   ├── index.css          # Tailwind CSS configuration entrypoint
 │   └── main.jsx           # Mounting entrypoint
+├── .gitignore             # Git ignored files configuration
 ├── package.json
 └── README.md
 ```
@@ -67,7 +72,7 @@ product-dashboard/
 - **Routing**: [React Router DOM 7](https://reactrouter.com/)
 - **Icons**: [Lucide React 0.47](https://lucide.dev/)
 - **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
-- **Persistance**: HTML5 Local Storage API
+- **Persistence**: HTML5 Local Storage API
 
 ---
 
@@ -78,17 +83,12 @@ Make sure you have Node.js installed on your machine (v18 or higher recommended)
 
 ### Setup and Start
 
-1. **Navigate into the folder**:
-   ```bash
-   cd product-dashboard
-   ```
-
-2. **Install all dependencies**:
+1. **Install all dependencies** from the repository root:
    ```bash
    npm install
    ```
 
-3. **Start the local development server**:
+2. **Start the local development server**:
    ```bash
    npm run dev
    ```
